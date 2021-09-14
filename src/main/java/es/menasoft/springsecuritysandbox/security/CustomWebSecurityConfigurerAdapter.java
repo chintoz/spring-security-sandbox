@@ -12,6 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static es.menasoft.springsecuritysandbox.security.ApplicationRoles.ADMIN;
+import static es.menasoft.springsecuritysandbox.security.ApplicationRoles.PLAYER;
+
 @Configuration
 @EnableWebSecurity
 public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
@@ -25,6 +28,7 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+                .antMatchers("/api/v1/player/**").hasRole(PLAYER.name())
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();
@@ -33,16 +37,25 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
     @Override
     @Bean
     protected UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(buildUser("awoods", "awoods00"),
-                buildUser("tcantlay", "tcantlay00"),
-                buildUser("bkoepka", "bkoepka00"));
+        return new InMemoryUserDetailsManager(buildPlayer("awoods", "awoods00"),
+                buildPlayer("tcantlay", "tcantlay00"),
+                buildPlayer("bkoepka", "bkoepka00"),
+                buildAdmin("admin", "admin00"));
     }
 
-    private UserDetails buildUser(String username, String password) {
+    private UserDetails buildAdmin(String username, String password) {
+        return buildUser(username, password, ADMIN);
+    }
+
+    private UserDetails buildPlayer(String username, String password) {
+        return buildUser(username, password, PLAYER);
+    }
+
+    private UserDetails buildUser(String username, String password, ApplicationRoles role) {
         return User.builder()
                 .username(username)
                 .password(passwordEncoder().encode(password))
-                .roles("PLAYER")
+                .roles(role.name())
                 .build();
     }
 }
