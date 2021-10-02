@@ -12,8 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static es.menasoft.springsecuritysandbox.security.ApplicationPermissions.PLAYER_WRITE;
 import static es.menasoft.springsecuritysandbox.security.ApplicationRoles.ADMIN;
 import static es.menasoft.springsecuritysandbox.security.ApplicationRoles.PLAYER;
+import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
@@ -26,9 +28,15 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http
+                .csrf().disable()
+                .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/v1/player/**").hasRole(PLAYER.name())
+                .antMatchers(DELETE, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
+                .antMatchers(POST, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
+                .antMatchers(PUT, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
+                .antMatchers(GET, "/management/api/**/player/**").hasAnyRole(ADMIN.name())
                 // Add antMatchers to check operations using permissions.
                 // Create a management API for players and tournaments.
                 .anyRequest().authenticated()
