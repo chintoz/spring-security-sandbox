@@ -29,6 +29,8 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         http.authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/v1/player/**").hasRole(PLAYER.name())
+                // Add antMatchers to check operations using permissions.
+                // Create a management API for players and tournaments.
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();
@@ -55,7 +57,8 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         return User.builder()
                 .username(username)
                 .password(passwordEncoder().encode(password))
-                .roles(role.name())
+                //.roles(role.name())
+                .authorities(role.getGrantedAuthorities())
                 .build();
     }
 }
