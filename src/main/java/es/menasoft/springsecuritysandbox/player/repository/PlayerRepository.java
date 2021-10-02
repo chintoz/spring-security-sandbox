@@ -1,6 +1,7 @@
 package es.menasoft.springsecuritysandbox.player.repository;
 
 import es.menasoft.springsecuritysandbox.player.model.Player;
+import es.menasoft.springsecuritysandbox.player.service.PlayerNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,5 +28,21 @@ public class PlayerRepository {
         return Optional.ofNullable(playersMap.get(playerId));
     }
 
+    public Player save(Player player) {
+        Integer playerId = playersMap.keySet().stream().max(Integer::compare).orElse(0) + 1;
+        player.setPlayerId(playerId);
+        playersMap.put(playerId, player);
+        return player;
+    }
 
+    public void delete(Integer playerId) {
+        playersMap.remove(playerId);
+    }
+
+    public void updatePlayer(Player player) {
+        if (playersMap.get(player.getPlayerId()) == null) {
+            throw new PlayerNotFoundException();
+        }
+        playersMap.put(player.getPlayerId(), player);
+    }
 }
