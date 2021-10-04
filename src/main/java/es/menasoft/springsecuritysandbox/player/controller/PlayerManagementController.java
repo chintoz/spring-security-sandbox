@@ -26,7 +26,7 @@ public class PlayerManagementController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority(ApplicationPermissions.PLAYER_WRITE.name())")
+    @PreAuthorize("hasAuthority('player:write')")
     public void registerNewPlayer(@RequestBody Player player) {
         playerRepository.save(player);
     }
