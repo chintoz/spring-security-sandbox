@@ -2,6 +2,7 @@ package es.menasoft.springsecuritysandbox.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -19,6 +20,7 @@ import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true) // To be able to use annotations for authorization such as @PreAuthorize
 public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Bean
@@ -33,10 +35,13 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/v1/player/**").hasRole(PLAYER.name())
-                .antMatchers(DELETE, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
-                .antMatchers(POST, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
-                .antMatchers(PUT, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
-                .antMatchers(GET, "/management/api/**/player/**").hasAnyRole(ADMIN.name())
+
+                // These matchers could be replaced by @PreAuthorize annotation
+                //.antMatchers(DELETE, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
+                //.antMatchers(POST, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
+                //.antMatchers(PUT, "/management/api/**/player/**").hasAuthority(PLAYER_WRITE.getPermissionName())
+                //.antMatchers(GET, "/management/api/**/player/**").hasAnyRole(ADMIN.name())
+
                 // Add antMatchers to check operations using permissions.
                 // Create a management API for players and tournaments.
                 .anyRequest().authenticated()
