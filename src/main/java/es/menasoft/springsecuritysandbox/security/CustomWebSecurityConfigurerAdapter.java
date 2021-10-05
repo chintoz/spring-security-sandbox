@@ -13,6 +13,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import java.util.concurrent.TimeUnit;
 
 import static es.menasoft.springsecuritysandbox.security.ApplicationPermissions.PLAYER_WRITE;
 import static es.menasoft.springsecuritysandbox.security.ApplicationRoles.ADMIN;
@@ -49,7 +53,17 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 // Create a management API for players and tournaments.
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic();
+                .formLogin() // Once it's authenticated, information is stored in cookie session id. Default cookie expiration by default 30 minutes
+                .loginPage("/login").permitAll()
+                .defaultSuccessUrl("/players", true)
+                .and().rememberMe().tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))   // Default 2 weeks (overridden to 21)
+                .key("somethingverysecure") // A key to be used to hash username:expiration for the remember-me cookie
+                .and().logout().logoutUrl("/logout")
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))// With CSRF this operation should be a POST
+                .clearAuthentication(true)
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID", "remember-me")
+                .logoutSuccessUrl("/login");
     }
 
     @Override
