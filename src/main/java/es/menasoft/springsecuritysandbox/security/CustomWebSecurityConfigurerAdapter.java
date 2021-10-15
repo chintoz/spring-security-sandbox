@@ -53,17 +53,22 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 // Create a management API for players and tournaments.
                 .anyRequest().authenticated()
                 .and()
-                .formLogin() // Once it's authenticated, information is stored in cookie session id. Default cookie expiration by default 30 minutes
-                .loginPage("/login").permitAll()
-                .defaultSuccessUrl("/players", true)
-                .and().rememberMe().tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))   // Default 2 weeks (overridden to 21)
-                .key("somethingverysecure") // A key to be used to hash username:expiration for the remember-me cookie
-                .and().logout().logoutUrl("/logout")
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))// With CSRF this operation should be a POST
-                .clearAuthentication(true)
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID", "remember-me")
-                .logoutSuccessUrl("/login");
+                    .formLogin() // Once it's authenticated, information is stored in cookie session id. Default cookie expiration by default 30 minutes
+                    .loginPage("/login").permitAll()
+                    .defaultSuccessUrl("/players", true)
+                    .usernameParameter("username") // customizable parameter name from login form
+                    .passwordParameter("password") // customizable parameter name from login form
+                .and()
+                    .rememberMe().tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))   // Default 2 weeks (overridden to 21)
+                    .key("somethingverysecure") // A key to be used to hash username:expiration for the remember-me cookie
+                    .rememberMeParameter("remember-me") // customizable parameter name from login form
+                .and()
+                    .logout().logoutUrl("/logout")
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))// With CSRF this operation should be a POST
+                    .clearAuthentication(true)
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "remember-me")
+                    .logoutSuccessUrl("/login");
     }
 
     @Override
